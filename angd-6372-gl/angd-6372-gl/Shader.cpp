@@ -72,12 +72,12 @@ void Shader::SetUniformMat4(const GLint id, const glm::mat4& value)
 
 void Shader::LoadShaderProgram(const char* vertShaderPath, const char* fragShaderPath)
 {
-    GLint vertStatus = GL_TRUE;
-    std::string vertShaderInfo = "";
-    GLint fragStatus = GL_TRUE;
-    std::string fragShaderInfo = "";
-    std::string linkInfo = "";
-    GLint linkStatus = GL_TRUE;
+    vertStatus = GL_TRUE;
+    vertShaderInfo = "";
+    fragStatus = GL_TRUE;
+    fragShaderInfo = "";
+    linkInfo = "";
+    linkStatus = GL_TRUE;
 
     char* vertSource = (char*)SDL_LoadFile(vertShaderPath, nullptr);
     char* fragSource = (char*)SDL_LoadFile(fragShaderPath, nullptr);
@@ -138,7 +138,6 @@ void Shader::LoadShaderProgram(const char* vertShaderPath, const char* fragShade
         if (infoLength > 0)
         {
             SDL_Log("Frag: %s", infoLog);
-            SDL_free(infoLog);
         }
         SDL_free(infoLog);
     }

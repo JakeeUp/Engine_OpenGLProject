@@ -93,13 +93,13 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(LibrariesArchitecture);$(SolutionDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /I /C "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\lib\x64\*.dll" "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\x64\Debug\"
+      <Command>xcopy /Y /I /C "$(SolutionDir)lib\x64\*.dll" "$(OutDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -117,15 +117,15 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(LibrariesArchitecture);$(SolutionDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /I /C "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\lib\x64\*.dll" "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\x64\Debug\"
+      <Command>xcopy /Y /I /C "$(SolutionDir)lib\x64\*.dll" "$(OutDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -140,13 +140,13 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(LibrariesArchitecture);$(SolutionDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /I /C "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\lib\x64\*.dll" "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\x64\Debug\"
+      <Command>xcopy /Y /I /C "$(SolutionDir)lib\x64\*.dll" "$(OutDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -164,15 +164,15 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(LibrariesArchitecture);$(SolutionDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;Opengl32.lib;glu32.lib;assimp-vc143-mt.lib;lua54.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /I /C "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\lib\x64\*.dll" "C:\Users\Jacob Fernandez\GithubRepos\Grad-Programming-Project\angd-6372-gl\x64\Debug\"
+      <Command>xcopy /Y /I /C "$(SolutionDir)lib\x64\*.dll" "$(OutDir)"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -208,8 +208,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Scripts\config.lua" />
+    <None Include="assets\Scripts\scene.lua" />
     <None Include="assets\shaders\basicFrag.glsl" />
     <None Include="assets\shaders\basicVert.glsl" />
+    <None Include="assets\shaders\reflectionFrag.glsl" />
     <None Include="imgui.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

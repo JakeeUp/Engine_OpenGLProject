@@ -9,7 +9,7 @@ struct SampleRange
 	void AddSample(TSampleType newSample)
 	{
 		samples[currentSample++] = newSample;
-		if (currentSample >= 200)
+		if (currentSample >= SampleCount)
 		{
 			currentSample = 0;
 		}
@@ -20,12 +20,12 @@ struct SampleRange
 	{
 
 		TSampleType sampleAverage = 0;
-		for (int i = 0; i < 200; ++i)
+		for (size_t i = 0; i < SampleCount; ++i)
 		{
 			sampleAverage += samples[i];
 		}
 
-		sampleAverage /= 200;
+		sampleAverage /= SampleCount;
 		return sampleAverage;
 
 	}
