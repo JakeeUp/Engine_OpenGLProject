@@ -53,6 +53,35 @@
 SampleRange<double, 200> drawSamples;
 SampleRange<double, 200> frameSamples;
 
+// ─── GPU timing ──────────────────────────────────────────────────────────────
+// Double-buffered GL_TIME_ELAPSED queries. We write into one query while
+// reading last frame's result from the other, so the CPU never blocks waiting
+// on the GPU (a single query read back the same frame would stall the pipeline
+// and make the measurement lie about real-world cost).
+SampleRange<double, 200> gpuSamples;
+GLuint gpuQueries[2] = { 0, 0 };
+int    gpuQueryIndex = 0;
+bool   gpuQueriesReady = false;
+// Under load the GPU can fall far enough behind that a query is not ready on
+// the frame we look for it, so we record fewer samples than frames. Averaging
+// over the full ring would divide by 200 and count never-written zeros, which
+// under-reports badly. Track how many slots actually hold data.
+int    gpuValidSamples = 0;
+
+double GpuAverageMs()
+{
+    if (gpuValidSamples <= 0) return 0.0;
+    const int n = (gpuValidSamples < 200) ? gpuValidSamples : 200;
+    double sum = 0.0;
+    for (int i = 0; i < n; ++i) sum += gpuSamples.samples[i];
+    return sum / n;
+}
+
+// ─── Scene complexity counters ───────────────────────────────────────────────
+// Reset at the top of every frame, incremented at each draw site.
+unsigned int frameDrawCalls = 0;
+unsigned int frameTriangles = 0;
+
 // Shader management
 Shader basicShader;
 Shader reflectionShader;
@@ -244,6 +273,14 @@ void DrawMesh(const Mesh& mesh)
     glBindVertexArray(mesh.vertexArrayObject);
     glDrawElements(mesh.meshType, mesh.indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+    // Scene complexity accounting. Only triangle topologies contribute a
+    // triangle count; lines and points still cost a draw call.
+    ++frameDrawCalls;
+    if (mesh.meshType == GL_TRIANGLES)
+        frameTriangles += mesh.indexCount / 3;
+    else if (mesh.meshType == GL_TRIANGLE_STRIP || mesh.meshType == GL_TRIANGLE_FAN)
+        frameTriangles += (mesh.indexCount >= 3) ? mesh.indexCount - 2 : 0;
 }
 
 // Function to load a texture from file
@@ -1646,6 +1683,16 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     const Uint64 frameStart = SDL_GetTicksNS();
     auto* app = static_cast<AppContext*>(appstate);
 
+    // Reset per-frame scene counters
+    frameDrawCalls = 0;
+    frameTriangles = 0;
+
+    // Lazily create the GPU timer queries on first frame
+    if (gpuQueries[0] == 0)
+    {
+        glGenQueries(2, gpuQueries);
+    }
+
     // ── ImGui frame ───────────────────────────────────────────────────────────
     ImGui_ImplSDL3_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
@@ -1690,6 +1737,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     glEnable(GL_DEPTH_TEST);
 
     const Uint64 drawStart = SDL_GetTicksNS();
+
+    // Begin GPU timing for this frame's scene rendering
+    glBeginQuery(GL_TIME_ELAPSED, gpuQueries[gpuQueryIndex]);
 
     // ── Render cubemap for reflection sphere ──────────────────────────────────
     if (showReflectionSphere && reflectionShader.programId > 0)
@@ -1766,6 +1816,27 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         DrawTranslateGizmo(basicShader, projection, view, meshInstances[selectedInstance].position);
     }
 
+    // End GPU timing for the scene (before ImGui, so we measure our renderer)
+    glEndQuery(GL_TIME_ELAPSED);
+
+    // Read back the OTHER query, which the GPU finished at least a frame ago.
+    // Reading the query we just issued would block until the GPU drained.
+    if (gpuQueriesReady)
+    {
+        const int readIndex = 1 - gpuQueryIndex;
+        GLint available = 0;
+        glGetQueryObjectiv(gpuQueries[readIndex], GL_QUERY_RESULT_AVAILABLE, &available);
+        if (available)
+        {
+            GLuint64 gpuNs = 0;
+            glGetQueryObjectui64v(gpuQueries[readIndex], GL_QUERY_RESULT, &gpuNs);
+            gpuSamples.AddSample(gpuNs / 1'000'000.0);
+            if (gpuValidSamples < 200) ++gpuValidSamples;
+        }
+    }
+    gpuQueryIndex = 1 - gpuQueryIndex;
+    gpuQueriesReady = true;
+
     const double drawMs =
         (SDL_GetTicksNS() - drawStart) / 1'000'000.0;
     drawSamples.AddSample(drawMs);
@@ -1780,10 +1851,17 @@ SDL_AppResult SDL_AppIterate(void* appstate)
         (SDL_GetTicksNS() - frameStart) / 1'000'000.0;
     frameSamples.AddSample(frameMs);
 
-    char title[96];
+    const double avgFrame = frameSamples.GetAverage();
+    char title[224];
     SDL_snprintf(title, sizeof(title),
-        "ANGD 6372 GL  |  Draw %.3f ms  |  Frame %.3f ms",
-        drawSamples.GetAverage(), frameSamples.GetAverage());
+        "ANGD 6372 GL  |  Frame %.3f ms (%.1f fps)  |  CPU Draw %.3f ms  |  GPU %.3f ms  |  %ux%u  |  %u draws  |  %u tris",
+        avgFrame,
+        avgFrame > 0.0 ? 1000.0 / avgFrame : 0.0,
+        drawSamples.GetAverage(),
+        GpuAverageMs(),
+        (unsigned)rw, (unsigned)rh,
+        frameDrawCalls,
+        frameTriangles);
     SDL_SetWindowTitle(app->window, title);
 
     LogLastGLError();

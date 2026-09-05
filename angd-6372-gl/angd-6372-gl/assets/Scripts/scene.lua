@@ -121,3 +121,28 @@ scene = {
         }
     }
 }
+
+-- ─── Stress test ────────────────────────────────────────────────────────────
+-- Spawns a grid of extra human meshes to measure how draw submission and GPU
+-- cost scale with instance count. Set STRESS_COUNT to 0 to disable.
+--
+-- NOTE: this Lua state only opens the base and math libraries (see
+-- open_libraries in main.cpp), so no table.insert and no string.format here.
+local STRESS_COUNT = 0
+local PER_ROW      = 10
+local SPACING_X    = 1.4
+local SPACING_Z    = 1.6
+
+local n = #scene.mesh_instances
+for i = 0, STRESS_COUNT - 1 do
+    local col = i % PER_ROW
+    local row = math.floor(i / PER_ROW)
+    n = n + 1
+    scene.mesh_instances[n] = {
+        name     = 'StressHuman_' .. i,
+        position = { -7.0 + col * SPACING_X, 0.0, -4.0 - row * SPACING_Z },
+        rotation = { 0.0, 0.0, 0.0 },
+        scale    = { 0.1, 0.1, 0.1 },
+        mesh     = 'human'
+    }
+end
