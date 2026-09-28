@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Wavefront model files in assets/ are source data, not compiler output
+!**/assets/**/*.obj
+
+# Vendored prebuilt libraries the project links against (flat files only)
+!angd-6372-gl/lib/x64/
+angd-6372-gl/lib/x64/*/

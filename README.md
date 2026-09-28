@@ -150,7 +150,7 @@ Full scene inspector panel with collapsible sections for shader controls, per-li
 
 3. **Set configuration** to `Debug | x64`
 
-4. **Build and run** — all dependencies (SDL3, GLEW, Assimp, Lua) are included in `lib/x64/`. The post-build step copies DLLs automatically.
+4. **Build and run** — prebuilt x64 import libraries and DLLs for SDL3 3.4.2, GLEW 2.3.1, Assimp 6.0.4 (vc143), and Lua 5.4.8 are committed in `lib/x64/`, and their headers are in `include/`. The post-build step copies the DLLs next to the executable automatically. No extra setup is required.
 
 ### Adding Your Own Models
 
